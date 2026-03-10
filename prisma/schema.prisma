@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Estudiantes
+model Estudiante {
+  id            String   @id @default(cuid())
+  codigo        String   @unique
+  nombre        String
+  apellido      String
+  grado         String
+  seccion       String
+  foto          String?
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  
+  // Padre/Tutor
+  padreNombre   String
+  padreTelefono String
+  padreChatId   String?  // Chat ID de Telegram del padre
+  
+  // Asistencias
+  asistencias   Asistencia[]
+}
+
+// Registro de asistencia
+model Asistencia {
+  id          String   @id @default(cuid())
+  estudianteId String
+  tipo        String   // "entrada" o "salida"
+  fecha       DateTime @default(now())
+  hora        String
+  metodo      String   @default("qr")
+  notas       String?
+  
+  estudiante  Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  
+  @@index([estudianteId])
+  @@index([fecha])
+}
+
+// Configuración de la escuela
+model Configuracion {
+  id                    String   @id @default(cuid())
+  nombreEscuela         String   @default("Mi Escuela")
+  logoUrl               String?
+  colorPrimario         String   @default("#10B981")
+  horaEntrada           String   @default("07:00")
+  horaSalida            String   @default("14:00")
+  mensajeEntrada        String   @default("✅ Tu hijo(a) ha llegado a la escuela")
+  mensajeSalida         String   @default("👋 Tu hijo(a) ha salido de la escuela")
+}
